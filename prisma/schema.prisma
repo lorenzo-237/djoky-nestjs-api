@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  username   String     @unique
+  email      String     @unique
+  password   String
+  firstname  String?
+  lastname   String?
+  role       Role       @default(USER)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  deletedAt  DateTime?
+  isDeleted  Boolean    @default(false)
+  categories Category[]
+  groups     Group[]
+  exercises  Exercise[]
+  workouts   Workout[]
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  MANAGER
+  ADMIN
+}
+
+// Define your Category model
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // Define a one(Category)-to-many(Group)
+  groups    Group[]
+
+  createdUserId Int
+  createdUser   User    @relation(fields: [createdUserId], references: [id])
+  isPending     Boolean @default(false)
+
+  @@map("categories")
+}
+
+// Define your Group model
+model Group {
+  id         Int        @id @default(autoincrement())
+  name       String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  // Define a many(Group)-to-one(Category)
+  categoryId Int
+  category   Category   @relation(fields: [categoryId], references: [id])
+  // Define a one(Group)-to-many(Exercice)
+  exercises  Exercise[]
+
+  createdUserId Int
+  createdUser   User    @relation(fields: [createdUserId], references: [id])
+  isPending     Boolean @default(false)
+
+  @@map("groups")
+}
+
+// Define your Exercise model
+model Exercise {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // Define a many(Exercice)-to-one(Group)
+  groupId     Int
+  group       Group    @relation(fields: [groupId], references: [id])
+
+  createdUserId Int
+  createdUser   User      @relation(fields: [createdUserId], references: [id])
+  isPending     Boolean   @default(false)
+  // Implicit many(Exercice)-to-many(Workout)
+  workouts      Workout[] @relation("exercices-workouts")
+
+  @@map("exercices")
+}
+
+// Define your Workout model
+model Workout {
+  id          Int        @id @default(autoincrement())
+  date        DateTime
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+  isDeleted   Boolean    @default(false)
+  // Define a many(Workout)-to-one(User)
+  userId      Int
+  user        User       @relation(fields: [userId], references: [id])
+  // Implicit many(Workout)-to-many(Exercice)
+  exercices   Exercise[] @relation("exercices-workouts")
+
+  @@map("workouts")
+}
