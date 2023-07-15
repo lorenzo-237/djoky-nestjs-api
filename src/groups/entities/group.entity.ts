@@ -23,7 +23,7 @@ export class GroupEntity implements Group {
   @ApiProperty()
   categoryId: number;
 
-  @ApiProperty({ required: false, type: CategoryEntity })
+  @ApiProperty({ required: false, type: () => CategoryEntity })
   category?: CategoryEntity;
 
   @ApiProperty()
@@ -32,7 +32,7 @@ export class GroupEntity implements Group {
   @ApiProperty({ required: false, type: UserEntity })
   createdUser?: UserEntity;
 
-  @ApiProperty({ required: false, type: ExerciseEntity, isArray: true })
+  @ApiProperty({ required: false, type: [ExerciseEntity] })
   exercices?: ExerciseEntity[];
 
   constructor(partial: Partial<GroupEntity>) {

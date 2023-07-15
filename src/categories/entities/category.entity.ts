@@ -25,7 +25,7 @@ export class CategoryEntity implements Category {
   @ApiProperty({ required: false, type: UserEntity })
   createdUser?: UserEntity;
 
-  @ApiProperty({ required: false, type: GroupEntity, isArray: true })
+  @ApiProperty({ required: false, type: [GroupEntity] })
   groups?: GroupEntity[];
 
   constructor(partial: Partial<CategoryEntity>) {

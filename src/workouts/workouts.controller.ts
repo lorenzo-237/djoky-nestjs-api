@@ -6,11 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
+  Session,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { WorkoutsService } from './workouts.service';
 import { CreateWorkoutDto } from './dto/create-workout.dto';
 import { UpdateWorkoutDto } from './dto/update-workout.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { WorkoutEntity } from './entities';
 
 @Controller('workouts')
 @ApiTags('workouts')
@@ -18,27 +22,49 @@ export class WorkoutsController {
   constructor(private readonly workoutsService: WorkoutsService) {}
 
   @Post()
-  create(@Body() createWorkoutDto: CreateWorkoutDto) {
-    return this.workoutsService.create(createWorkoutDto);
+  @ApiCreatedResponse({ type: WorkoutEntity })
+  async create(
+    @Body() createWorkoutDto: CreateWorkoutDto,
+    @Session() session: Record<string, any>,
+  ) {
+    if (!session?.passport?.user?.id) {
+      throw new UnauthorizedException();
+    }
+
+    const userId = session.passport.user.id;
+
+    return new WorkoutEntity(
+      await this.workoutsService.create(userId, createWorkoutDto),
+    );
   }
 
   @Get()
-  findAll() {
-    return this.workoutsService.findAll();
+  @ApiOkResponse({ type: WorkoutEntity, isArray: true })
+  async findAll() {
+    const workouts = await this.workoutsService.findAll();
+    return workouts.map((workout) => new WorkoutEntity(workout));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.workoutsService.findOne(+id);
+  @ApiOkResponse({ type: WorkoutEntity })
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return new WorkoutEntity(await this.workoutsService.findOne(id));
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWorkoutDto: UpdateWorkoutDto) {
-    return this.workoutsService.update(+id, updateWorkoutDto);
+  @ApiCreatedResponse({ type: WorkoutEntity })
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateWorkoutDto: UpdateWorkoutDto,
+  ) {
+    return new WorkoutEntity(
+      await this.workoutsService.update(id, updateWorkoutDto),
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.workoutsService.remove(+id);
+  @ApiOkResponse({ type: WorkoutEntity })
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return new WorkoutEntity(await this.workoutsService.remove(id));
   }
 }

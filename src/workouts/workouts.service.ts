@@ -1,26 +1,53 @@
 import { Injectable } from '@nestjs/common';
 import { CreateWorkoutDto } from './dto/create-workout.dto';
 import { UpdateWorkoutDto } from './dto/update-workout.dto';
+import { PrismaService } from 'nestjs-prisma';
 
 @Injectable()
 export class WorkoutsService {
-  create(createWorkoutDto: CreateWorkoutDto) {
-    return 'This action adds a new workout';
+  constructor(private prisma: PrismaService) {}
+
+  create(userId: number, createWorkoutDto: CreateWorkoutDto) {
+    const data = {
+      userId: userId,
+      ...createWorkoutDto,
+    };
+
+    return this.prisma.workout.create({
+      data: data,
+    });
   }
 
   findAll() {
-    return `This action returns all workouts`;
+    return this.prisma.workout.findMany({
+      where: {
+        isDeleted: false,
+      },
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} workout`;
+    return this.prisma.workout.findUnique({
+      where: {
+        id,
+      },
+    });
   }
 
   update(id: number, updateWorkoutDto: UpdateWorkoutDto) {
-    return `This action updates a #${id} workout`;
+    return this.prisma.workout.update({
+      where: { id },
+      data: updateWorkoutDto,
+    });
   }
 
   remove(id: number) {
-    return `This action removes a #${id} workout`;
+    return this.prisma.workout.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        isDeleted: true,
+      },
+    });
   }
 }

@@ -16,7 +16,11 @@ export class UsersService {
   }
 
   findAll() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      where: {
+        isDeleted: false,
+      },
+    });
   }
 
   findOne(id: number) {
@@ -28,7 +32,14 @@ export class UsersService {
   }
 
   remove(id: number) {
-    return this.prisma.user.delete({ where: { id } });
+    // return this.prisma.user.delete({ where: { id } });
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        isDeleted: true,
+      },
+    });
   }
 
   async fetchUserByUsername(username: string) {

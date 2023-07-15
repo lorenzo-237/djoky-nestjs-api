@@ -6,11 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
+  Session,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ExercisesService } from './exercises.service';
 import { CreateExerciseDto } from './dto/create-exercise.dto';
 import { UpdateExerciseDto } from './dto/update-exercise.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ExerciseEntity } from './entities';
 
 @Controller('exercises')
 @ApiTags('exercises')
@@ -18,30 +22,49 @@ export class ExercisesController {
   constructor(private readonly exercisesService: ExercisesService) {}
 
   @Post()
-  create(@Body() createExerciseDto: CreateExerciseDto) {
-    return this.exercisesService.create(createExerciseDto);
+  @ApiCreatedResponse({ type: ExerciseEntity })
+  async create(
+    @Body() createExerciseDto: CreateExerciseDto,
+    @Session() session: Record<string, any>,
+  ) {
+    if (!session?.passport?.user?.id) {
+      throw new UnauthorizedException();
+    }
+
+    const userId = session.passport.user.id;
+
+    return new ExerciseEntity(
+      await this.exercisesService.create(userId, createExerciseDto),
+    );
   }
 
   @Get()
-  findAll() {
-    return this.exercisesService.findAll();
+  @ApiOkResponse({ type: ExerciseEntity, isArray: true })
+  async findAll() {
+    const exercises = await this.exercisesService.findAll();
+    return exercises.map((exercise) => new ExerciseEntity(exercise));
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.exercisesService.findOne(+id);
+  @ApiOkResponse({ type: ExerciseEntity })
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return new ExerciseEntity(await this.exercisesService.findOne(id));
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @ApiCreatedResponse({ type: ExerciseEntity })
+  async update(
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateExerciseDto: UpdateExerciseDto,
   ) {
-    return this.exercisesService.update(+id, updateExerciseDto);
+    return new ExerciseEntity(
+      await this.exercisesService.update(id, updateExerciseDto),
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.exercisesService.remove(+id);
+  @ApiOkResponse({ type: ExerciseEntity })
+  async remove(@Param('id', ParseIntPipe) id: number) {
+    return new ExerciseEntity(await this.exercisesService.remove(id));
   }
 }

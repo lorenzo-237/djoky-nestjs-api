@@ -26,7 +26,7 @@ export class ExerciseEntity implements Exercise {
   @ApiProperty()
   groupId: number;
 
-  @ApiProperty({ type: GroupEntity })
+  @ApiProperty({ type: () => GroupEntity })
   group: GroupEntity;
 
   @ApiProperty()
@@ -35,7 +35,7 @@ export class ExerciseEntity implements Exercise {
   @ApiProperty({ required: false, type: UserEntity })
   createdUser?: UserEntity;
 
-  @ApiProperty({ required: false, type: WorkoutEntity, isArray: true })
+  @ApiProperty({ required: false, type: [WorkoutEntity] })
   workouts?: WorkoutEntity[];
 
   constructor(partial: Partial<ExerciseEntity>) {
