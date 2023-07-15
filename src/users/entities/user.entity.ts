@@ -29,7 +29,7 @@ export class UserEntity implements User {
   @Exclude()
   password: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: ['ADMIN', 'MANAGER', 'USER'] })
   role: Role;
 
   @ApiProperty()
