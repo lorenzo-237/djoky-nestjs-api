@@ -12,6 +12,8 @@ export class WorkoutsService {
       userId: userId,
       ...createWorkoutDto,
     };
+    // transform the valid date string to a date object to insert it, into postgresql
+    data.date = new Date(createWorkoutDto.date);
 
     return this.prisma.workout.create({
       data: data,
