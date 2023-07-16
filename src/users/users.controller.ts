@@ -13,18 +13,22 @@ import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UserEntity } from './entities';
+import { Roles } from 'src/utils/decorators';
+import { Role } from 'src/utils/enums';
 
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
+  @Roles(Role.Admin, Role.Manager)
   @Post()
   @ApiCreatedResponse({ type: UserEntity })
   async createUser(@Body() dto: CreateUserDto) {
     return new UserEntity(await this.usersService.create(dto));
   }
 
+  @Roles(Role.Admin, Role.Manager)
   @Get()
   @ApiOkResponse({ type: UserEntity, isArray: true })
   async findAll() {

@@ -10,6 +10,7 @@ import { GroupsModule } from './groups/groups.module';
 import { ExercisesModule } from './exercises/exercises.module';
 import { WorkoutsModule } from './workouts/workouts.module';
 import { PrismaModule } from 'nestjs-prisma';
+import { RolesGuard } from './utils/guards';
 
 @Module({
   imports: [
@@ -30,6 +31,10 @@ import { PrismaModule } from 'nestjs-prisma';
     {
       provide: APP_GUARD,
       useClass: SessionAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

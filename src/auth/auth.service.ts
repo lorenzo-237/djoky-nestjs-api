@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import { HashService } from 'src/utils/services';
 import { AuthEntity } from './entities';
+import { UserEntity } from 'src/users/entities';
 
 @Injectable()
 export class AuthService {
@@ -38,6 +39,10 @@ export class AuthService {
     if (!matched) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    delete user.password;
+    delete user.deletedAt;
+    delete user.isDeleted;
 
     return user;
   }
