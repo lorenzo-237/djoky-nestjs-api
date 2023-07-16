@@ -39,8 +39,6 @@ export class AuthController {
   // only for testing purposes
   @Get('session')
   async getAuthSession(@Session() session: Record<string, any>) {
-    console.log(session);
-    console.log(session.id);
     session.authenticated = true;
     return session;
   }

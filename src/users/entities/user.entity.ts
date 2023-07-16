@@ -5,7 +5,6 @@ import { Exclude } from 'class-transformer';
 export class UserEntity implements User {
   constructor(partial: Partial<UserEntity>) {
     if (!partial) {
-      console.log('partial user is null');
       return;
     }
     Object.assign(this, partial);

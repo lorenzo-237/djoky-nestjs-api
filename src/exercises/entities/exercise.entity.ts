@@ -40,7 +40,6 @@ export class ExerciseEntity implements Exercise {
 
   constructor(partial: Partial<ExerciseEntity>) {
     if (!partial) {
-      console.log('exercice entity is null');
       return null;
     }
 

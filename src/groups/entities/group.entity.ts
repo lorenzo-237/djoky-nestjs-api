@@ -37,7 +37,6 @@ export class GroupEntity implements Group {
 
   constructor(partial: Partial<GroupEntity>) {
     if (!partial) {
-      console.log('group entity is null');
       return null;
     }
 

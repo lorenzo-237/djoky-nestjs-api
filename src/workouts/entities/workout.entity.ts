@@ -36,7 +36,6 @@ export class WorkoutEntity implements Workout {
 
   constructor(partial: Partial<WorkoutEntity>) {
     if (!partial) {
-      console.log('workout entity is null');
       return null;
     }
 

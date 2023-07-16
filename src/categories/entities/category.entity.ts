@@ -30,7 +30,6 @@ export class CategoryEntity implements Category {
 
   constructor(partial: Partial<CategoryEntity>) {
     if (!partial) {
-      console.log('category entity is null');
       return null;
     }
 
