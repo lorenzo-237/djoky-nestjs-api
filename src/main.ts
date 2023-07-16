@@ -30,6 +30,11 @@ async function bootstrap() {
 
   const env = app.get(ConfigService);
 
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
+
   app.use(
     ['/api/docs', '/api/docs-json', '/api/docs-yaml'],
     basicAuth({
