@@ -7,6 +7,8 @@ import {
   Req,
   Session,
   Body,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { LocalAuthGuard } from './guards';
 import { Public } from 'src/utils/decorators';
@@ -25,12 +27,14 @@ export class AuthController {
     type: LoginDto,
   })
   @Post('login')
+  @HttpCode(HttpStatus.OK)
   async loginLocal(@Request() req) {
     return req.user;
   }
 
   @Public()
   @Post('login/token')
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AuthEntity })
   async loginJwt(@Body() { username, password }: LoginDto) {
     return this.authService.loginJwt(username, password);
