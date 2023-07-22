@@ -22,7 +22,6 @@ import { Public } from 'src/utils/decorators';
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @Public()
   @Post()
   @ApiCreatedResponse({ type: CategoryEntity })
   async create(
@@ -39,7 +38,6 @@ export class CategoriesController {
     );
   }
 
-  @Public()
   @Get()
   @ApiOkResponse({ type: CategoryEntity, isArray: true })
   async findAll() {

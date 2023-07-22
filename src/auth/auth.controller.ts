@@ -16,6 +16,7 @@ import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthEntity } from './entities';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto';
+import { UserEntity } from 'src/users/entities';
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
@@ -26,6 +27,7 @@ export class AuthController {
   @ApiBody({
     type: LoginDto,
   })
+  @ApiOkResponse({ type: UserEntity })
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async loginLocal(@Request() req) {
@@ -40,11 +42,11 @@ export class AuthController {
     return this.authService.loginJwt(username, password);
   }
 
-  // only for testing purposes
   @Get('session')
+  @ApiOkResponse({ type: UserEntity })
   async getAuthSession(@Session() session: Record<string, any>) {
-    session.authenticated = true;
-    return session;
+    const user = await this.authService.getUserFromSession(session);
+    return new UserEntity(user);
   }
 
   @Get('status')

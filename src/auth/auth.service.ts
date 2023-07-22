@@ -13,7 +13,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
+  async validateUser(username: string, password: string) {
     const user = await this.fetchUser(username, password);
 
     return user;
@@ -25,6 +25,16 @@ export class AuthService {
     return {
       accessToken: this.jwtService.sign({ userId: user.id }),
     };
+  }
+
+  async getUserFromSession(session: any) {
+    const user = await this.usersService.findOne(session.passport.user.id);
+
+    if (!user) {
+      throw new UnauthorizedException(`Session isn't valid`);
+    }
+
+    return user;
   }
 
   async fetchUser(username: string, password: string) {
