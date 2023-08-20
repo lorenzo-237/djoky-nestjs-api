@@ -19,7 +19,22 @@ export class CategoriesService {
   }
 
   findAll() {
-    return this.prisma.category.findMany();
+    return this.prisma.category.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+    });
+  }
+
+  findAllValid() {
+    return this.prisma.category.findMany({
+      where: {
+        isPending: false,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
   }
 
   findOne(id: number) {
@@ -34,6 +49,24 @@ export class CategoriesService {
     return this.prisma.category.update({
       where: { id },
       data: updateCategoryDto,
+    });
+  }
+
+  validate(id: number) {
+    return this.prisma.category.update({
+      where: { id },
+      data: {
+        isPending: false,
+      },
+    });
+  }
+
+  pending(id: number) {
+    return this.prisma.category.update({
+      where: { id },
+      data: {
+        isPending: true,
+      },
     });
   }
 

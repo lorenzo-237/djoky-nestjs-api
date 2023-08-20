@@ -14,8 +14,9 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { CategoryEntity } from './entities';
-import { Public } from 'src/utils/decorators';
+import { CategoryEntity, CategoryResponse } from './entities';
+import { Roles } from 'src/utils/decorators';
+import { Role } from 'src/utils/enums';
 
 @Controller('categories')
 @ApiTags('categories')
@@ -24,6 +25,7 @@ export class CategoriesController {
 
   @Post()
   @ApiCreatedResponse({ type: CategoryEntity })
+  @Roles(Role.Admin, Role.Manager)
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
     @Session() session: Record<string, any>,
@@ -38,23 +40,30 @@ export class CategoriesController {
     );
   }
 
-  @Get()
-  @ApiOkResponse({ type: CategoryEntity, isArray: true })
+  @Get('all')
+  @Roles(Role.Admin, Role.Manager)
+  @ApiOkResponse({ type: CategoryResponse })
   async findAll() {
     const categories = await this.categoriesService.findAll();
-    return categories.map((category) => new CategoryEntity(category));
+    return { count: categories.length, rows: categories };
   }
 
-  @Public()
+  @Get()
+  @ApiOkResponse({ type: CategoryResponse })
+  async findValidCategories() {
+    const categories = await this.categoriesService.findAllValid();
+    return { count: categories.length, rows: categories };
+  }
+
   @Get(':id')
   @ApiOkResponse({ type: CategoryEntity })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return new CategoryEntity(await this.categoriesService.findOne(id));
   }
 
-  @Public()
   @Patch(':id')
   @ApiCreatedResponse({ type: CategoryEntity })
+  @Roles(Role.Admin, Role.Manager)
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -64,9 +73,23 @@ export class CategoriesController {
     );
   }
 
-  @Public()
+  @Patch(':id/validate')
+  @ApiCreatedResponse({ type: CategoryEntity })
+  @Roles(Role.Admin, Role.Manager)
+  async validateCategory(@Param('id', ParseIntPipe) id: number) {
+    return new CategoryEntity(await this.categoriesService.validate(id));
+  }
+
+  @Patch(':id/pending')
+  @ApiCreatedResponse({ type: CategoryEntity })
+  @Roles(Role.Admin, Role.Manager)
+  async pendingCategory(@Param('id', ParseIntPipe) id: number) {
+    return new CategoryEntity(await this.categoriesService.pending(id));
+  }
+
   @Delete(':id')
   @ApiOkResponse({ type: CategoryEntity })
+  @Roles(Role.Admin)
   async remove(@Param('id', ParseIntPipe) id: number) {
     return new CategoryEntity(await this.categoriesService.remove(id));
   }
