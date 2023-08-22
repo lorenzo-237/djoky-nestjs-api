@@ -1,8 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Group } from '@prisma/client';
-import { CategoryEntity } from 'src/categories/entities';
-import { ExerciseEntity } from 'src/exercises/entities';
-import { UserEntity } from 'src/users/entities';
 
 export class GroupEntity implements Group {
   @ApiProperty()
@@ -23,17 +20,8 @@ export class GroupEntity implements Group {
   @ApiProperty()
   categoryId: number;
 
-  @ApiProperty({ required: false, type: () => CategoryEntity })
-  category?: CategoryEntity;
-
   @ApiProperty()
   createdUserId: number;
-
-  @ApiProperty({ required: false, type: UserEntity })
-  createdUser?: UserEntity;
-
-  @ApiProperty({ required: false, type: [ExerciseEntity] })
-  exercices?: ExerciseEntity[];
 
   constructor(partial: Partial<GroupEntity>) {
     if (!partial) {
@@ -41,15 +29,5 @@ export class GroupEntity implements Group {
     }
 
     Object.assign(this, partial);
-
-    if (partial.createdUser) {
-      this.createdUser = new UserEntity(partial.createdUser);
-    }
-
-    if (partial.exercices) {
-      this.exercices = partial.exercices.map(
-        (exercice) => new ExerciseEntity(exercice),
-      );
-    }
   }
 }

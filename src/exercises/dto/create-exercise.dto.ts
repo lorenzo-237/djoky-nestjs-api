@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsInt, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsInt,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateExerciseDto {
@@ -16,4 +22,9 @@ export class CreateExerciseDto {
   @IsString()
   @ApiProperty()
   description: string;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  @ApiProperty()
+  timed: boolean;
 }

@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CreateWorkoutDto } from './dto/create-workout.dto';
 import { UpdateWorkoutDto } from './dto/update-workout.dto';
 import { PrismaService } from 'nestjs-prisma';
+import { selectDefaultWorkout } from './constants';
 
 @Injectable()
 export class WorkoutsService {
   constructor(private prisma: PrismaService) {}
 
-  create(userId: number, createWorkoutDto: CreateWorkoutDto) {
+  async create(userId: number, createWorkoutDto: CreateWorkoutDto) {
     const data = {
       userId: userId,
       ...createWorkoutDto,
@@ -15,41 +16,52 @@ export class WorkoutsService {
     // transform the valid date string to a date object to insert it, into postgresql
     data.date = new Date(createWorkoutDto.date);
 
-    return this.prisma.workout.create({
+    const createdWorkout = await this.prisma.workout.create({
       data: data,
     });
+
+    return createdWorkout;
   }
 
-  findAll() {
+  findAll(userId: number, admin: boolean) {
     return this.prisma.workout.findMany({
+      select: selectDefaultWorkout,
       where: {
-        isDeleted: false,
+        isDeleted: admin ? undefined : false,
+        userId: userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
 
-  findOne(id: number) {
+  findOne(id: number, userId: number) {
     return this.prisma.workout.findUnique({
+      select: selectDefaultWorkout,
       where: {
         id,
+        userId,
       },
     });
   }
 
-  update(id: number, updateWorkoutDto: UpdateWorkoutDto) {
-    return this.prisma.workout.update({
+  async update(id: number, updateWorkoutDto: UpdateWorkoutDto) {
+    const updatedWorkout = await this.prisma.workout.update({
       where: { id },
       data: updateWorkoutDto,
     });
+    return this.findOne(updatedWorkout.id, updatedWorkout.userId);
   }
 
-  remove(id: number) {
-    return this.prisma.workout.update({
+  async remove(id: number) {
+    const updatedWorkout = await this.prisma.workout.update({
       where: { id },
       data: {
         deletedAt: new Date(),
         isDeleted: true,
       },
     });
+    return this.findOne(updatedWorkout.id, updatedWorkout.userId);
   }
 }

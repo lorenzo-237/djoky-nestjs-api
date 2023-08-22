@@ -61,7 +61,7 @@ model Group {
   // Define a many(Group)-to-one(Category)
   categoryId Int
   category   Category   @relation(fields: [categoryId], references: [id])
-  // Define a one(Group)-to-many(Exercice)
+  // Define a one(Group)-to-many(Exercise)
   exercises  Exercise[]
 
   createdUserId Int
@@ -78,33 +78,51 @@ model Exercise {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  // Define a many(Exercice)-to-one(Group)
+  // Define a many(Exercise)-to-one(Group)
   groupId     Int
   group       Group    @relation(fields: [groupId], references: [id])
 
   createdUserId Int
-  createdUser   User      @relation(fields: [createdUserId], references: [id])
-  isPending     Boolean   @default(false)
-  // Implicit many(Exercice)-to-many(Workout)
-  workouts      Workout[] @relation("exercices-workouts")
+  createdUser   User    @relation(fields: [createdUserId], references: [id])
+  isPending     Boolean @default(false)
 
-  @@map("exercices")
+  timed Boolean @default(false)
+
+  // Explicit many(Exercise)-to-many(Workout)
+  workouts WorkoutsOnExercises[]
+
+  @@map("exercises")
 }
 
 // Define your Workout model
 model Workout {
-  id          Int        @id @default(autoincrement())
+  id          Int                   @id @default(autoincrement())
   date        DateTime
   description String?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
   deletedAt   DateTime?
-  isDeleted   Boolean    @default(false)
+  isDeleted   Boolean               @default(false)
   // Define a many(Workout)-to-one(User)
   userId      Int
-  user        User       @relation(fields: [userId], references: [id])
-  // Implicit many(Workout)-to-many(Exercice)
-  exercices   Exercise[] @relation("exercices-workouts")
+  user        User                  @relation(fields: [userId], references: [id])
+  // Explicit many(Workout)-to-many(Exercise)
+  exercises   WorkoutsOnExercises[]
 
   @@map("workouts")
+}
+
+model WorkoutsOnExercises {
+  exercise    Exercise @relation(fields: [exerciseId], references: [id])
+  exerciseId  Int
+  workout     Workout  @relation(fields: [workoutId], references: [id])
+  workoutId   Int
+  assignedAt  DateTime @default(now())
+  time        Int
+  weight      Int
+  series      Int
+  repetitions Int
+  total       Int
+
+  @@id([exerciseId, workoutId])
 }

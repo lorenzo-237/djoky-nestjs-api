@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exercise } from '@prisma/client';
 import { GroupEntity } from 'src/groups/entities';
 import { UserEntity } from 'src/users/entities';
-import { WorkoutEntity } from 'src/workouts/entities';
 
 export class ExerciseEntity implements Exercise {
   @ApiProperty()
@@ -35,8 +34,8 @@ export class ExerciseEntity implements Exercise {
   @ApiProperty({ required: false, type: UserEntity })
   createdUser?: UserEntity;
 
-  @ApiProperty({ required: false, type: [WorkoutEntity] })
-  workouts?: WorkoutEntity[];
+  @ApiProperty()
+  timed: boolean;
 
   constructor(partial: Partial<ExerciseEntity>) {
     if (!partial) {
@@ -47,12 +46,6 @@ export class ExerciseEntity implements Exercise {
 
     if (partial.createdUser) {
       this.createdUser = new UserEntity(partial.createdUser);
-    }
-
-    if (partial.workouts) {
-      this.workouts = partial.workouts.map(
-        (workout) => new WorkoutEntity(workout),
-      );
     }
   }
 }

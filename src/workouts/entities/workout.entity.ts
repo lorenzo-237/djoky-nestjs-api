@@ -1,9 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Workout } from '@prisma/client';
-import { ExerciseEntity } from 'src/exercises/entities';
-import { UserEntity } from 'src/users/entities';
+import { ExerciseGroup } from 'src/exercises/entities';
+import { SelectWorkout } from '../types';
 
-export class WorkoutEntity implements Workout {
+export class WorkoutUser {
+  @ApiProperty()
+  id: number;
+  @ApiProperty()
+  firstname: string;
+  @ApiProperty()
+  lastname: string;
+}
+
+export class WorkoutExercise {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty({ required: false })
+  description: string;
+
+  @ApiProperty({ type: ExerciseGroup })
+  group: ExerciseGroup;
+}
+
+export class WorkoutEntity {
   @ApiProperty()
   id: number;
 
@@ -25,30 +47,35 @@ export class WorkoutEntity implements Workout {
   @ApiProperty()
   isDeleted: boolean;
 
-  @ApiProperty()
-  userId: number;
+  @ApiProperty({ type: WorkoutUser })
+  user: WorkoutUser;
 
-  @ApiProperty({ type: UserEntity })
-  user: UserEntity;
+  @ApiProperty({ type: WorkoutExercise, isArray: true })
+  exercises?: WorkoutExercise[];
 
-  @ApiProperty({ required: false, type: ExerciseEntity, isArray: true })
-  exercices?: ExerciseEntity[];
-
-  constructor(partial: Partial<WorkoutEntity>) {
+  constructor(partial: Partial<SelectWorkout>) {
     if (!partial) {
       return null;
     }
 
-    Object.assign(this, partial);
+    this.id = partial.id;
+    this.date = partial.date;
+    this.description = partial.description;
+    this.createdAt = partial.createdAt;
+    this.updatedAt = partial.updatedAt;
+    this.deletedAt = partial.deletedAt;
+    this.isDeleted = partial.isDeleted;
 
     if (partial.user) {
-      this.user = new UserEntity(partial.user);
+      this.user = {
+        id: partial.user.id,
+        firstname: partial.user.firstname,
+        lastname: partial.user.lastname,
+      };
     }
 
-    if (partial.exercices) {
-      this.exercices = partial.exercices.map(
-        (exercice) => new ExerciseEntity(exercice),
-      );
+    if (partial.exercises) {
+      this.exercises = partial.exercises.map((item) => item.exercise);
     }
   }
 }

@@ -1,7 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Category } from '@prisma/client';
-import { GroupEntity } from 'src/groups/entities';
-import { UserEntity } from 'src/users/entities';
 
 export class CategoryEntity implements Category {
   @ApiProperty()
@@ -22,25 +20,11 @@ export class CategoryEntity implements Category {
   @ApiProperty()
   createdUserId: number;
 
-  @ApiProperty({ required: false, type: UserEntity })
-  createdUser?: UserEntity;
-
-  @ApiProperty({ required: false, type: [GroupEntity] })
-  groups?: GroupEntity[];
-
   constructor(partial: Partial<CategoryEntity>) {
     if (!partial) {
       return null;
     }
 
     Object.assign(this, partial);
-
-    if (partial.createdUser) {
-      this.createdUser = new UserEntity(partial.createdUser);
-    }
-
-    if (partial.groups) {
-      this.groups = partial.groups.map((group) => new GroupEntity(group));
-    }
   }
 }

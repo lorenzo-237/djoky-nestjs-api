@@ -49,7 +49,7 @@ export class GroupsController {
 
   @Get()
   @ApiOkResponse({ type: GroupResponse })
-  async findValidGroup() {
+  async findValidGroups() {
     const groups = await this.groupsService.findAllValid();
     return { count: groups.length, rows: groups };
   }
