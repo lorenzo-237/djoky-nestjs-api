@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CategoryResponse {
-  @ApiProperty()
-  count: number;
-  @ApiProperty()
-  rows: CategoryRow[];
-}
-
 export class CategoryRow {
   @ApiProperty()
   id: number;
@@ -25,4 +18,11 @@ export class CategoryRow {
 
   @ApiProperty()
   isPending: boolean;
+}
+
+export class CategoryResponse {
+  @ApiProperty()
+  count: number;
+  @ApiProperty({ type: CategoryRow, isArray: true })
+  rows: CategoryRow[];
 }

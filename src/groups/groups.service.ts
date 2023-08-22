@@ -19,7 +19,50 @@ export class GroupsService {
   }
 
   findAll() {
-    return this.prisma.group.findMany();
+    return this.prisma.group.findMany({
+      orderBy: {
+        name: 'asc',
+      },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+        createdUserId: true,
+        isPending: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
+  findAllValid() {
+    return this.prisma.group.findMany({
+      where: {
+        isPending: false,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+        createdUserId: true,
+        isPending: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
   }
 
   findOne(id: number) {

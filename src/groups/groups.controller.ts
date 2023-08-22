@@ -14,7 +14,7 @@ import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { GroupEntity } from './entities';
+import { GroupEntity, GroupResponse } from './entities';
 
 @Controller('groups')
 @ApiTags('groups')
@@ -37,11 +37,18 @@ export class GroupsController {
     );
   }
 
-  @Get()
-  @ApiOkResponse({ type: GroupEntity, isArray: true })
+  @Get('all')
+  @ApiOkResponse({ type: GroupResponse })
   async findAll() {
     const groups = await this.groupsService.findAll();
-    return groups.map((group) => new GroupEntity(group));
+    return { count: groups.length, rows: groups };
+  }
+
+  @Get()
+  @ApiOkResponse({ type: GroupResponse })
+  async findValidGroup() {
+    const groups = await this.groupsService.findAllValid();
+    return { count: groups.length, rows: groups };
   }
 
   @Get(':id')
