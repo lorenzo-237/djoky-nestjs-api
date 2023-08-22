@@ -14,7 +14,10 @@ import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { GroupEntity, GroupResponse } from './entities';
+import { GroupResponse, GroupRow } from './entities';
+import { Roles } from 'src/utils/decorators';
+import { Role } from 'src/utils/enums';
+import { SessionPassport } from 'src/utils/types';
 
 @Controller('groups')
 @ApiTags('groups')
@@ -22,23 +25,23 @@ export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
   @Post()
-  @ApiCreatedResponse({ type: GroupEntity })
+  @ApiCreatedResponse({ type: GroupRow })
+  @Roles(Role.Admin, Role.Manager)
   async create(
     @Body() createGroupDto: CreateGroupDto,
-    @Session() session: Record<string, any>,
+    @Session() session: SessionPassport,
   ) {
-    if (!session?.passport?.user?.id) {
+    if (!session.passport.user.id) {
       throw new UnauthorizedException();
     }
 
     const userId = session.passport.user.id;
-    return new GroupEntity(
-      await this.groupsService.create(userId, createGroupDto),
-    );
+    return await this.groupsService.create(userId, createGroupDto);
   }
 
   @Get('all')
   @ApiOkResponse({ type: GroupResponse })
+  @Roles(Role.Admin, Role.Manager)
   async findAll() {
     const groups = await this.groupsService.findAll();
     return { count: groups.length, rows: groups };
@@ -52,23 +55,38 @@ export class GroupsController {
   }
 
   @Get(':id')
-  @ApiOkResponse({ type: GroupEntity })
+  @ApiOkResponse({ type: GroupRow })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return new GroupEntity(await this.groupsService.findOne(id));
+    return await this.groupsService.findOne(id);
   }
 
   @Patch(':id')
-  @ApiCreatedResponse({ type: GroupEntity })
+  @ApiOkResponse({ type: GroupRow })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateGroupDto: UpdateGroupDto,
   ) {
-    return new GroupEntity(await this.groupsService.update(id, updateGroupDto));
+    return await this.groupsService.update(id, updateGroupDto);
+  }
+
+  @Patch(':id/validate')
+  @ApiOkResponse({ type: GroupRow })
+  @Roles(Role.Admin, Role.Manager)
+  async validateCategory(@Param('id', ParseIntPipe) id: number) {
+    return await this.groupsService.validate(id);
+  }
+
+  @Patch(':id/pending')
+  @ApiOkResponse({ type: GroupRow })
+  @Roles(Role.Admin, Role.Manager)
+  async pendingCategory(@Param('id', ParseIntPipe) id: number) {
+    return await this.groupsService.pending(id);
   }
 
   @Delete(':id')
-  @ApiOkResponse({ type: GroupEntity })
+  @ApiOkResponse({ type: GroupRow })
+  @Roles(Role.Admin)
   async remove(@Param('id', ParseIntPipe) id: number) {
-    return new GroupEntity(await this.groupsService.remove(id));
+    return await this.groupsService.remove(id);
   }
 }

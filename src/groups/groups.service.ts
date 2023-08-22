@@ -3,19 +3,34 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { PrismaService } from 'nestjs-prisma';
 
+const defaultSelect = {
+  id: true,
+  name: true,
+  createdAt: true,
+  updatedAt: true,
+  createdUserId: true,
+  isPending: true,
+  category: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+};
 @Injectable()
 export class GroupsService {
   constructor(private prisma: PrismaService) {}
 
-  create(userId: number, createGroupDto: CreateGroupDto) {
+  async create(userId: number, createGroupDto: CreateGroupDto) {
     const data = {
       createdUserId: userId,
       ...createGroupDto,
     };
 
-    return this.prisma.group.create({
+    const createdGroup = await this.prisma.group.create({
       data: data,
     });
+    return this.findOne(createdGroup.id);
   }
 
   findAll() {
@@ -23,20 +38,7 @@ export class GroupsService {
       orderBy: {
         name: 'asc',
       },
-      select: {
-        id: true,
-        name: true,
-        createdAt: true,
-        updatedAt: true,
-        createdUserId: true,
-        isPending: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+      select: defaultSelect,
     });
   }
 
@@ -48,36 +50,45 @@ export class GroupsService {
       orderBy: {
         name: 'asc',
       },
-      select: {
-        id: true,
-        name: true,
-        createdAt: true,
-        updatedAt: true,
-        createdUserId: true,
-        isPending: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+      select: defaultSelect,
     });
   }
 
   findOne(id: number) {
     return this.prisma.group.findUnique({
+      select: defaultSelect,
       where: {
         id,
       },
     });
   }
 
-  update(id: number, updateGroupDto: UpdateGroupDto) {
-    return this.prisma.group.update({
+  async update(id: number, updateGroupDto: UpdateGroupDto) {
+    const updatedGroup = await this.prisma.group.update({
       where: { id },
       data: updateGroupDto,
     });
+    return this.findOne(updatedGroup.id);
+  }
+
+  async validate(id: number) {
+    const updatedGroup = await this.prisma.group.update({
+      where: { id },
+      data: {
+        isPending: false,
+      },
+    });
+    return this.findOne(updatedGroup.id);
+  }
+
+  async pending(id: number) {
+    const updatedGroup = await this.prisma.group.update({
+      where: { id },
+      data: {
+        isPending: true,
+      },
+    });
+    return this.findOne(updatedGroup.id);
   }
 
   remove(id: number) {

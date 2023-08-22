@@ -17,6 +17,7 @@ import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CategoryEntity, CategoryResponse } from './entities';
 import { Roles } from 'src/utils/decorators';
 import { Role } from 'src/utils/enums';
+import { SessionPassport } from 'src/utils/types';
 
 @Controller('categories')
 @ApiTags('categories')
@@ -28,7 +29,7 @@ export class CategoriesController {
   @Roles(Role.Admin, Role.Manager)
   async create(
     @Body() createCategoryDto: CreateCategoryDto,
-    @Session() session: Record<string, any>,
+    @Session() session: SessionPassport,
   ) {
     if (!session?.passport?.user?.id) {
       throw new UnauthorizedException();
@@ -41,8 +42,8 @@ export class CategoriesController {
   }
 
   @Get('all')
-  @Roles(Role.Admin, Role.Manager)
   @ApiOkResponse({ type: CategoryResponse })
+  @Roles(Role.Admin, Role.Manager)
   async findAll() {
     const categories = await this.categoriesService.findAll();
     return { count: categories.length, rows: categories };
@@ -62,7 +63,7 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  @ApiCreatedResponse({ type: CategoryEntity })
+  @ApiOkResponse({ type: CategoryEntity })
   @Roles(Role.Admin, Role.Manager)
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -74,14 +75,14 @@ export class CategoriesController {
   }
 
   @Patch(':id/validate')
-  @ApiCreatedResponse({ type: CategoryEntity })
+  @ApiOkResponse({ type: CategoryEntity })
   @Roles(Role.Admin, Role.Manager)
   async validateCategory(@Param('id', ParseIntPipe) id: number) {
     return new CategoryEntity(await this.categoriesService.validate(id));
   }
 
   @Patch(':id/pending')
-  @ApiCreatedResponse({ type: CategoryEntity })
+  @ApiOkResponse({ type: CategoryEntity })
   @Roles(Role.Admin, Role.Manager)
   async pendingCategory(@Param('id', ParseIntPipe) id: number) {
     return new CategoryEntity(await this.categoriesService.pending(id));
