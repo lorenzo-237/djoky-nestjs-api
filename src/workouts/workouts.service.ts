@@ -20,7 +20,7 @@ export class WorkoutsService {
       data: data,
     });
 
-    return createdWorkout;
+    return this.findOne(createdWorkout.id);
   }
 
   findAll(userId: number, admin: boolean) {
@@ -36,12 +36,11 @@ export class WorkoutsService {
     });
   }
 
-  findOne(id: number, userId: number) {
+  findOne(id: number) {
     return this.prisma.workout.findUnique({
       select: selectDefaultWorkout,
       where: {
         id,
-        userId,
       },
     });
   }
@@ -51,7 +50,7 @@ export class WorkoutsService {
       where: { id },
       data: updateWorkoutDto,
     });
-    return this.findOne(updatedWorkout.id, updatedWorkout.userId);
+    return this.findOne(updatedWorkout.id);
   }
 
   async remove(id: number) {
@@ -62,6 +61,6 @@ export class WorkoutsService {
         isDeleted: true,
       },
     });
-    return this.findOne(updatedWorkout.id, updatedWorkout.userId);
+    return this.findOne(updatedWorkout.id);
   }
 }

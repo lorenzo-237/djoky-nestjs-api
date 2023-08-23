@@ -14,7 +14,7 @@ import { WorkoutsService } from './workouts.service';
 import { CreateWorkoutDto } from './dto/create-workout.dto';
 import { UpdateWorkoutDto } from './dto/update-workout.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { WorkoutEntity } from './entities';
+import { WorkoutEntity, WorkoutResponse } from './entities';
 import { SessionPassport } from 'src/utils/types';
 
 @Controller('workouts')
@@ -42,13 +42,14 @@ export class WorkoutsController {
   // todo : faire les routes pour admin (il peut sélectionner l'utilisateur qu'il souhaite)
 
   @Get()
-  @ApiOkResponse({ type: WorkoutEntity, isArray: true })
+  @ApiOkResponse({ type: WorkoutResponse })
   async findAll(@Session() session: SessionPassport) {
-    const workouts = await this.workoutsService.findAll(
+    const workoutsDb = await this.workoutsService.findAll(
       session.passport.user.id,
       false,
     );
-    return workouts.map((workout) => new WorkoutEntity(workout));
+    const workouts = workoutsDb.map((workout) => new WorkoutEntity(workout));
+    return { count: workouts.length, rows: workouts };
   }
 
   @Get(':id')
@@ -57,9 +58,12 @@ export class WorkoutsController {
     @Param('id', ParseIntPipe) id: number,
     @Session() session: SessionPassport,
   ) {
-    return new WorkoutEntity(
-      await this.workoutsService.findOne(id, session.passport.user.id),
+    const findWorkout = new WorkoutEntity(
+      await this.workoutsService.findOne(id),
     );
+    if (session.passport.user.id === findWorkout.user.id) return findWorkout;
+
+    throw new UnauthorizedException();
   }
 
   @Patch(':id')
