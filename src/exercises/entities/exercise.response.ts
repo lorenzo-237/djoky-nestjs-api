@@ -32,6 +32,9 @@ export class ExerciseRow {
   @ApiProperty()
   isPending: boolean;
 
+  @ApiProperty()
+  timed: boolean;
+
   @ApiProperty({ type: ExerciseGroup })
   group: ExerciseGroup;
 }

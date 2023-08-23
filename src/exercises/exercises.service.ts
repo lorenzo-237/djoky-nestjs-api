@@ -11,6 +11,7 @@ const defaultSelect = {
   updatedAt: true,
   createdUserId: true,
   isPending: true,
+  timed: true,
   group: {
     select: {
       id: true,
