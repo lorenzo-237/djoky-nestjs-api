@@ -58,9 +58,8 @@ export class WorkoutsController {
     @Param('id', ParseIntPipe) id: number,
     @Session() session: SessionPassport,
   ) {
-    const findWorkout = new WorkoutEntity(
-      await this.workoutsService.findOne(id),
-    );
+    const dbWorkout = await this.workoutsService.findOne(id);
+    const findWorkout = new WorkoutEntity(dbWorkout);
     if (session.passport.user.id === findWorkout.user.id) return findWorkout;
 
     throw new UnauthorizedException();

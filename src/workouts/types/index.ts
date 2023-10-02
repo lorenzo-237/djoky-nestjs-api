@@ -1,4 +1,4 @@
-export interface SelectWorkout {
+export interface PrismaEntityWorkout {
   id: number;
   date: Date;
   description: string;
@@ -25,5 +25,11 @@ export interface SelectWorkout {
         };
       };
     };
+    assignedAt: Date;
+    series: number;
+    repetitions: number;
+    time: number;
+    weight: number;
+    total: number;
   }[];
 }

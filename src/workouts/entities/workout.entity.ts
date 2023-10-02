@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ExerciseGroup } from 'src/exercises/entities';
-import { SelectWorkout } from '../types';
+import { PrismaEntityWorkout } from '../types';
 
 export class WorkoutUser {
   @ApiProperty()
@@ -23,6 +23,24 @@ export class WorkoutExercise {
 
   @ApiProperty({ type: ExerciseGroup })
   group: ExerciseGroup;
+
+  @ApiProperty()
+  assignedAt: Date;
+
+  @ApiProperty()
+  series: number;
+
+  @ApiProperty()
+  repetitions: number;
+
+  @ApiProperty()
+  time: number;
+
+  @ApiProperty()
+  weight: number;
+
+  @ApiProperty()
+  total: number;
 }
 
 export class WorkoutEntity {
@@ -53,7 +71,7 @@ export class WorkoutEntity {
   @ApiProperty({ type: WorkoutExercise, isArray: true })
   exercises?: WorkoutExercise[];
 
-  constructor(partial: Partial<SelectWorkout>) {
+  constructor(partial: Partial<PrismaEntityWorkout>) {
     if (!partial) {
       return null;
     }
@@ -75,7 +93,20 @@ export class WorkoutEntity {
     }
 
     if (partial.exercises) {
-      this.exercises = partial.exercises.map((item) => item.exercise);
+      this.exercises = partial.exercises.map((item) => {
+        const workoutExercise = new WorkoutExercise();
+        workoutExercise.id = item.exercise.id;
+        workoutExercise.name = item.exercise.name;
+        workoutExercise.description = item.exercise.description;
+        workoutExercise.group = item.exercise.group;
+        workoutExercise.series = item.series;
+        workoutExercise.repetitions = item.repetitions;
+        workoutExercise.time = item.time;
+        workoutExercise.weight = item.weight;
+        workoutExercise.total = item.total;
+        workoutExercise.assignedAt = item.assignedAt;
+        return workoutExercise;
+      });
     }
   }
 }
