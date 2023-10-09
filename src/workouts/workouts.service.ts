@@ -4,6 +4,15 @@ import { UpdateWorkoutDto } from './dto/update-workout.dto';
 import { PrismaService } from 'nestjs-prisma';
 import { selectDefaultWorkout } from './constants';
 
+type FilterWhere = {
+  isDeleted?: boolean;
+  userId: number;
+  date?: {
+    gte?: Date;
+    lte?: Date;
+  };
+};
+
 @Injectable()
 export class WorkoutsService {
   constructor(private prisma: PrismaService) {}
@@ -23,17 +32,60 @@ export class WorkoutsService {
     return this.findOne(createdWorkout.id);
   }
 
-  findAll(userId: number, admin: boolean) {
-    return this.prisma.workout.findMany({
+  async findAll({
+    userId,
+    admin,
+    startDate,
+    endDate,
+    page,
+    pageSize,
+  }: {
+    userId: number;
+    admin: boolean;
+    startDate: Date | undefined;
+    endDate: Date | undefined;
+    page: number;
+    pageSize: number;
+  }) {
+    const where: FilterWhere = {
+      isDeleted: admin ? undefined : false,
+      userId: userId,
+    };
+
+    if (startDate != undefined) {
+      where.date = {
+        gte: startDate,
+      };
+    }
+
+    if (endDate != undefined) {
+      if (!where.date) {
+        where.date = {};
+      }
+      where.date.lte = endDate;
+    }
+
+    const skip = (page - 1) * pageSize;
+
+    const workoutsDb = await this.prisma.workout.findMany({
       select: selectDefaultWorkout,
-      where: {
-        isDeleted: admin ? undefined : false,
-        userId: userId,
-      },
+      where,
+      skip,
+      take: pageSize,
       orderBy: {
-        createdAt: 'desc',
+        date: 'desc',
       },
     });
+
+    const totalCount = await this.prisma.workout.count({
+      where,
+    });
+
+    return {
+      count: totalCount,
+      totalPage: Math.ceil(totalCount / pageSize), // plus petit entier supérieur
+      workoutsDb,
+    };
   }
 
   findOne(id: number) {

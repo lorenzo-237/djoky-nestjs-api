@@ -9,13 +9,16 @@ import {
   ParseIntPipe,
   Session,
   UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import { WorkoutsService } from './workouts.service';
-import { CreateWorkoutDto } from './dto/create-workout.dto';
-import { UpdateWorkoutDto } from './dto/update-workout.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { WorkoutEntity, WorkoutResponse } from './entities';
 import { SessionPassport } from 'src/utils/types';
+import { CreateWorkoutDto, UpdateWorkoutDto, WorkoutFilterDto } from './dto';
+import adjustEndOfDay from './functions/adjust-end-of-day';
+import parsePositiveNonNullInt from './functions/parse-positive-non-null-int';
+import { SIZE_PAGE } from './constants';
 
 @Controller('workouts')
 @ApiTags('workouts')
@@ -43,13 +46,33 @@ export class WorkoutsController {
 
   @Get()
   @ApiOkResponse({ type: WorkoutResponse })
-  async findAll(@Session() session: SessionPassport) {
-    const workoutsDb = await this.workoutsService.findAll(
-      session.passport.user.id,
-      false,
+  async findAll(
+    @Session() session: SessionPassport,
+    @Query() filter: WorkoutFilterDto,
+  ) {
+    const intPage = parsePositiveNonNullInt(filter.page, 1);
+    const intSize = parsePositiveNonNullInt(filter.pageSize, SIZE_PAGE);
+
+    const { count, totalPage, workoutsDb } = await this.workoutsService.findAll(
+      {
+        userId: session.passport.user.id,
+        admin: false,
+        startDate: filter.startDate ? new Date(filter.startDate) : undefined,
+        endDate: filter.endDate
+          ? adjustEndOfDay(new Date(filter.endDate))
+          : undefined,
+        page: intPage,
+        pageSize: intSize,
+      },
     );
     const workouts = workoutsDb.map((workout) => new WorkoutEntity(workout));
-    return { count: workouts.length, rows: workouts };
+    return {
+      page: intPage,
+      pageSize: intSize,
+      totalPage,
+      count: count,
+      rows: workouts,
+    };
   }
 
   @Get(':id')

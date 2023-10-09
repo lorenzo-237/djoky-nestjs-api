@@ -43,3 +43,5 @@ export const selectDefaultWorkout = {
     },
   },
 };
+
+export const SIZE_PAGE = 10;
