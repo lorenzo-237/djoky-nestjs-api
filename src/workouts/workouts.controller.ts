@@ -67,7 +67,7 @@ export class WorkoutsController {
     );
     const workouts = workoutsDb.map((workout) => new WorkoutEntity(workout));
     return {
-      page: count > 0 ? intPage : 0,
+      page: count > 0 ? intPage : -1,
       pageSize: count > 0 ? intSize : 0,
       totalPage,
       count: count,
