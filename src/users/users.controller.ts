@@ -55,6 +55,7 @@ export class UsersController {
     return new UserEntity(await this.usersService.update(id, updateUserDto));
   }
 
+  @Roles(Role.Admin, Role.Manager)
   @Delete(':id')
   @ApiOkResponse({ type: UserEntity })
   async remove(@Param('id', ParseIntPipe) id: number) {
