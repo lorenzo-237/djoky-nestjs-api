@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { PrismaService } from 'nestjs-prisma';
+import { GroupRow } from './entities';
 
 const defaultSelect = {
   id: true,
@@ -16,7 +17,11 @@ const defaultSelect = {
       name: true,
     },
   },
-  exercises: true,
+  exercises: {
+    select: {
+      id: true,
+    },
+  },
 };
 @Injectable()
 export class GroupsService {
@@ -42,7 +47,13 @@ export class GroupsService {
       select: defaultSelect,
     });
 
-    return groups;
+    const groupsWithExerciseCount: GroupRow[] = groups.map((group) => ({
+      ...group,
+      exercisesCount: group.exercises.length,
+      exercises: undefined,
+    }));
+
+    return groupsWithExerciseCount;
   }
 
   findOne(id: number) {

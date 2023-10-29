@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ExerciseModel } from 'src/exercises/entities';
 
 export class GroupCategory {
   @ApiProperty()
@@ -30,9 +29,8 @@ export class GroupRow {
   @ApiProperty({ type: GroupCategory })
   category: GroupCategory;
 
-  // avec cette ligne j'ai une circular dep
-  // @ApiProperty({ type: ExerciseModel, isArray: true })
-  exercises: ExerciseModel[];
+  @ApiProperty()
+  exercisesCount: number;
 }
 
 export class GroupResponse {
