@@ -16,6 +16,7 @@ const defaultSelect = {
       name: true,
     },
   },
+  exercises: true,
 };
 @Injectable()
 export class GroupsService {
@@ -33,25 +34,15 @@ export class GroupsService {
     return this.findOne(createdGroup.id);
   }
 
-  findAll() {
-    return this.prisma.group.findMany({
+  async findAll() {
+    const groups = await this.prisma.group.findMany({
       orderBy: {
         name: 'asc',
       },
       select: defaultSelect,
     });
-  }
 
-  findAllValid() {
-    return this.prisma.group.findMany({
-      where: {
-        isPending: false,
-      },
-      orderBy: {
-        name: 'asc',
-      },
-      select: defaultSelect,
-    });
+    return groups;
   }
 
   findOne(id: number) {
