@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ExerciseModel } from 'src/exercises/entities';
 
 export class GroupCategory {
   @ApiProperty()
@@ -28,6 +29,9 @@ export class GroupRow {
 
   @ApiProperty({ type: GroupCategory })
   category: GroupCategory;
+
+  @ApiProperty({ type: ExerciseModel, isArray: true })
+  exercises: ExerciseModel[];
 }
 
 export class GroupResponse {

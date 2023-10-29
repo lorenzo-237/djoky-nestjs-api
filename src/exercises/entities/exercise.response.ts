@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { GroupCategory } from 'src/groups/entities';
 
 export class ExerciseGroup {
@@ -10,7 +10,7 @@ export class ExerciseGroup {
   category: GroupCategory;
 }
 
-export class ExerciseRow {
+export class ExerciseModel {
   @ApiProperty()
   id: number;
 
@@ -34,7 +34,9 @@ export class ExerciseRow {
 
   @ApiProperty()
   timed: boolean;
+}
 
+export class ExerciseRow extends PartialType(ExerciseModel) {
   @ApiProperty({ type: ExerciseGroup })
   group: ExerciseGroup;
 }
