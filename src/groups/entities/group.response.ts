@@ -30,13 +30,14 @@ export class GroupRow {
   @ApiProperty({ type: GroupCategory })
   category: GroupCategory;
 
-  @ApiProperty({ type: ExerciseModel, isArray: true })
+  // avec cette ligne j'ai une circular dep
+  // @ApiProperty({ type: ExerciseModel, isArray: true })
   exercises: ExerciseModel[];
 }
 
 export class GroupResponse {
   @ApiProperty()
   count: number;
-  @ApiProperty({ type: GroupRow, isArray: true })
+  @ApiProperty({ type: () => GroupRow, isArray: true })
   rows: GroupRow[];
 }
