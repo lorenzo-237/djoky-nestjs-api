@@ -39,18 +39,10 @@ export class GroupsController {
     return await this.groupsService.create(userId, createGroupDto);
   }
 
-  @Get('all')
-  @ApiOkResponse({ type: GroupResponse })
-  @Roles(Role.Admin, Role.Manager)
-  async findAll() {
-    const groups = await this.groupsService.findAll();
-    return { count: groups.length, rows: groups };
-  }
-
   @Get()
   @ApiOkResponse({ type: GroupResponse })
   async findValidGroups() {
-    const groups = await this.groupsService.findAllValid();
+    const groups = await this.groupsService.findAll();
     return { count: groups.length, rows: groups };
   }
 
